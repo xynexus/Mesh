@@ -27,12 +27,12 @@ from fe.parts import PartsModel
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "out")
 
-# Rev A candidate: tx.optimize() from the seed (PartsModel() defaults,
-# Switch(kind="spdt")), snapped to E24. Evaluated with the spdt+shunt default.
+# Rev A candidate: tx.optimize() from the seed with PartsModel() and Switch()
+# defaults (spdt+shunt), snapped to E24.
 REV_A_VHF = tx.VhfArm(L1=10e-9, C6=0.91e-12, C1=75e-12, L2=30e-9, C2=33e-12,
                       L3=47e-9, C3=7.5e-12, L3t=33e-9)
 REV_A_UHF = tx.UhfArm(Lb=27e-9, Cb=39e-12, L1=0.75e-9, C6=3.6e-12, L2=0.43e-9,
-                      C2=16e-12, L3=8.2e-9, C3=3.3e-12)
+                      C2=16e-12, L3=8.2e-9, C3=3.0e-12)
 
 
 def _fmt_z(z):

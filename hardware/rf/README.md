@@ -86,13 +86,13 @@ section references.
 ## Results (Rev A values, default parts and switch)
 
 From `python tx_diplexer.py evaluate`. These are E24 values, optimized from the
-seed with the plain-SPDT switch.
+seed with the default spdt+shunt switch.
 
 | Band selected | PA load \|Γ\| vs optimum | Conducted fundamental | RX loss from idle TX path |
 |---|---|---|---|
 | VHF, 150.79–152.49 MHz | 0.03 | 20.6–20.7 dBm | 0.28–0.31 dB |
 | VHF, 173.29–174.0 MHz | 0.10–0.11 | 20.2–20.3 dBm | 0.34–0.35 dB |
-| UHF, 915–928 MHz | 0.10–0.14 | 20.4–20.5 dBm | 0.48–0.52 dB |
+| UHF, 915–928 MHz | 0.07–0.11 | 20.6 dBm | 0.53–0.57 dB |
 
 Fundamental figures are relative to the AN923.2 reference board, which measures
 20.4 dBm at 169 MHz and 20.3 dBm at 915 MHz. So to first order, sharing the pin
@@ -103,7 +103,7 @@ Worst conducted harmonics (dBm), VHF transmitting:
 | | 2f | 3f | 4f | 5f | 6f | 7f | 8f |
 |---|---|---|---|---|---|---|---|
 | VHF SMA | −38.7 | −41.9 | −69.7 | −65.4 | −88.9 | −88.4 | −122 |
-| UHF SMA (spdt+shunt) | −73 | −54 | −63 | −43 | −58 | −47 | −68 |
+| UHF SMA (spdt+shunt) | −73 | −54 | −63 | −43 | −58 | −47 | −67 |
 
 What the model says so far:
 
