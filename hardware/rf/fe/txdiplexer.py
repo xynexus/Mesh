@@ -149,9 +149,10 @@ def build(freq, vhf: VhfArm, uhf: UhfArm, parts: PartsModel, sw: Switch,
 @dataclass(frozen=True)
 class Calibration:
     """Effective Class-D source harmonics, fitted so the single-band reference
-    match reproduces AN923.2 Table 4.3 (fundamental, 2nd, 3rd harmonic).
-    Harmonics above the 3rd are extrapolated as 1/n from the fitted 2nd (even)
-    and 3rd (odd) -- an assumption, not measured."""
+    match reproduces measured conducted power at each harmonic for which the
+    chosen source (efr32.REF_MEASURED_DBM) has data. Missing harmonics are
+    extrapolated as 1/n from the fitted 2nd (even) or 3rd (odd) -- an
+    assumption, not measured."""
 
     v1: float
     ratio: dict  # n -> |Vn| / |V1|
@@ -165,13 +166,17 @@ class Calibration:
         return self.v1 * self.ratio[base] * base / n
 
 
-def calibrate(f0: float, parts: PartsModel) -> Calibration:
-    fr = ckt.frequency([f0, 2 * f0, 3 * f0])
+CAL_SOURCES = tuple(efr32.REF_MEASURED_DBM)
+
+
+def calibrate(f0: float, parts: PartsModel, source: str = "an923") -> Calibration:
+    meas = efr32.REF_MEASURED_DBM[source][f0]
+    orders = sorted(meas)
+    fr = ckt.frequency([h * f0 for h in orders])
     n = efr32.reference_tx(fr, efr32.REF_BOM_20DBM[f0], parts)
     p_unit = ckt.delivered_power(n, 1.0, efr32.pa_source_z(fr.f))[:, 1]
-    meas_w = 1e-3 * 10 ** (np.array(efr32.REF_MEASURED_DBM[f0]) / 10)
-    v = np.sqrt(meas_w / p_unit)
-    return Calibration(v1=float(v[0]), ratio={2: float(v[1] / v[0]), 3: float(v[2] / v[0])})
+    v = np.sqrt(1e-3 * 10 ** (np.array([meas[h] for h in orders]) / 10) / p_unit)
+    return Calibration(v1=float(v[0]), ratio={h: float(v[i] / v[0]) for i, h in enumerate(orders) if h > 1})
 
 
 # --- Evaluation -----------------------------------------------------------
@@ -196,10 +201,10 @@ def _loads(vhf_ant, uhf_ant):
 
 
 def evaluate(vhf: VhfArm, uhf: UhfArm, parts: PartsModel, sw: Switch = Switch(),
-             vhf_ant=None, uhf_ant=None) -> dict:
+             vhf_ant=None, uhf_ant=None, cal: str = "an923") -> dict:
     """Per-band TX metrics (die impedance, calibrated port powers, harmonics
     at both SMAs) plus RX-mode loading of each node by the idle TX path."""
-    cals = {"VHF": calibrate(169e6, parts), "UHF": calibrate(915e6, parts)}
+    cals = {"VHF": calibrate(169e6, parts, cal), "UHF": calibrate(915e6, parts, cal)}
     fr = eval_frequency()
     zs = efr32.pa_source_z(fr.f)
     loads = _loads(vhf_ant, uhf_ant)

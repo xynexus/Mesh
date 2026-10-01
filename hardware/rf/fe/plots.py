@@ -40,10 +40,10 @@ def _label_end(ax, x, y, text, color):
     ax.plot(x[-1], y[-1], "o", color=color, ms=4)
 
 
-def harmonic_leakage(vhf, uhf, parts, sw, path, limit_dbm):
-    """Conducted power at each SMA while VHF transmits (calibrated source,
-    1/n harmonic extrapolation), across 100 MHz-1.4 GHz."""
-    cal = tx.calibrate(169e6, parts)
+def harmonic_leakage(vhf, uhf, parts, sw, path, limit_dbm, cal_source="an923"):
+    """Conducted power at each SMA while VHF transmits (calibrated source),
+    across 100 MHz-1.4 GHz."""
+    cal = tx.calibrate(169e6, parts, cal_source)
     f0 = np.array([151.64e6, 173.65e6])
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.2), sharey=True, facecolor=SURFACE)
     for ax, fc in zip(axes, f0):
@@ -65,7 +65,8 @@ def harmonic_leakage(vhf, uhf, parts, sw, path, limit_dbm):
         top.set_xticks(f_mhz, [f"{h}f" for h in hs])
         top.tick_params(colors=TEXT_2, labelsize=8, length=0)
         top.spines["top"].set_color(GRID)
-        _style(ax, f"VHF TX at {fc / 1e6:.2f} MHz", "Frequency (MHz)", "Conducted power (dBm)")
+        _style(ax, f"VHF TX at {fc / 1e6:.2f} MHz ({cal_source} calibration)", "Frequency (MHz)",
+               "Conducted power (dBm)")
         ax.set_ylim(-135, 30)
         ax.set_xlim(0, f_mhz[-1] * 1.12)
     axes[0].legend(frameon=False, loc="upper right", fontsize=9, labelcolor=TEXT)

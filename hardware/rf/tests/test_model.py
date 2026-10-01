@@ -52,14 +52,17 @@ def test_reference_match_reproduces_an923_pa_load(f0):
     assert abs(z - efr32.ZIN_TARGET[f0]) < 1.5
 
 
-def test_calibration_reproduces_measured_fundamental():
+@pytest.mark.parametrize("source", tx.CAL_SOURCES)
+@pytest.mark.parametrize("f0", [169e6, 915e6])
+def test_calibration_reproduces_every_measured_harmonic(source, f0):
     parts = PartsModel()
-    for f0 in (169e6, 915e6):
-        cal = tx.calibrate(f0, parts)
-        fr = ckt.frequency([f0])
-        n = efr32.reference_tx(fr, efr32.REF_BOM_20DBM[f0], parts)
-        p = ckt.delivered_power(n, cal.v1, efr32.pa_source_z(fr.f))[0, 1]
-        assert ckt.dbm(p) == pytest.approx(efr32.REF_MEASURED_DBM[f0][0], abs=1e-6)
+    cal = tx.calibrate(f0, parts, source)
+    meas = efr32.REF_MEASURED_DBM[source][f0]
+    fr = ckt.frequency([h * f0 for h in sorted(meas)])
+    n = efr32.reference_tx(fr, efr32.REF_BOM_20DBM[f0], parts)
+    pu = ckt.delivered_power(n, 1.0, efr32.pa_source_z(fr.f))[:, 1]
+    p = [ckt.dbm(pu[i] * cal.vn(h) ** 2) for i, h in enumerate(sorted(meas))]
+    assert p == pytest.approx([meas[h] for h in sorted(meas)], abs=1e-6)
 
 
 def test_uhf_arm_blocks_vhf_and_vhf_arm_blocks_uhf():

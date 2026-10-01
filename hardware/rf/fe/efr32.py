@@ -61,11 +61,28 @@ REF_BOM_20DBM = {
 }
 REF_BOM_20DBM[868e6] = REF_BOM_20DBM[915e6]
 
-# Conducted measurements, +20 dBm (Table 4.3): (P_fund, P_2nd, P_3rd) dBm.
+# Conducted power with the +20 dBm reference match, dBm, keyed by harmonic
+# order. Two sources that disagree strongly at 169 MHz with the same BOM:
+#  * "an923": AN923.2 Table 4.3, measured on EFR32xG23 radio boards.
+#  * "fg28-ds": EFR32FG28 datasheet Tables 4.22 (169 MHz) and 4.15 (915 MHz),
+#    typical values, same BOM (datasheet Table 5.7). The datasheet only gives
+#    the worst harmonic per regulatory group, so only the harmonic most likely
+#    to set each group's maximum is fitted: 169 MHz 2f ("other < 1 GHz") and
+#    3f (470-862 MHz group); 915 MHz 2f (-52.5 dBc, non-restricted) and 3f
+#    (restricted bands). Fitting the other group members to the same bound
+#    gives unphysical sources because the parasitic-free ladder model
+#    over-attenuates them. FG28_DS_169_ABOVE_1GHZ is kept as a check only.
 REF_MEASURED_DBM = {
-    169e6: (20.4, -36.1, -52.1),
-    915e6: (20.3, -39.6, -50.6),
+    "an923": {
+        169e6: {1: 20.4, 2: -36.1, 3: -52.1},
+        915e6: {1: 20.3, 2: -39.6, 3: -50.6},
+    },
+    "fg28-ds": {
+        169e6: {1: 21.1, 2: -52.9, 3: -89.3},
+        915e6: {1: 20.5, 2: 20.5 - 52.5, 3: -50.4},
+    },
 }
+FG28_DS_169_ABOVE_1GHZ = -78.3  # worst 169 MHz harmonic above 1 GHz (6f+), typ.
 
 
 def reference_tx(freq, bom: dict, parts: PartsModel = LOSSLESS):
