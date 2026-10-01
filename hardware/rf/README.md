@@ -17,6 +17,18 @@ output.
 > very poor. The 2.4 GHz port has its own pins and uses the datasheet's
 > reference match (Table 5.8, with a BGS12WN6 SPDT tying the TX and RX pins
 > together); it doesn't interact with the sub-GHz diplexer.
+>
+> All four functions are **time-shared on one transceiver**: VHF, UHF, GPS L2
+> on RF1 (SUBG_I1/O1), and BLE on RF0 (RF2G4_I0/O0), per the FG28 datasheet
+> §3. That has three consequences:
+> - Only one path is ever active, so a single band-select state sets every
+>   switch, LNA enable and the bias-tee.
+> - No path receives while another band transmits. The only cross-band
+>   concerns are TX harmonics leaving through idle connectors (modelled here)
+>   and idle inputs surviving coupled TX power.
+> - BLE can share the UHF antenna through a simple 915 MHz / 2.44 GHz
+>   diplexer, because it is never active while the UHF shunt switch is
+>   closed.
 
 The first model is the **shared-TX-pin diplexer** (`tx_diplexer.py`). The RX
 side (SP3T selector → wideband LNA → broadband pin match) is not modelled yet.
