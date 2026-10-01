@@ -12,8 +12,11 @@ output.
 > sub-GHz pair (SUBG_I0/SUBG_O0), and AN923.2 §3.1/§3.3 says the internal
 > switch selects between the two pairs. VHF and UHF could then each have their
 > own pin and match, and this whole diplexer and its harmonic-isolation switch
-> would no longer be needed. The cost is losing 2.4 GHz, the lowest-priority
-> band.
+> would no longer be needed. The cost is losing 2.4 GHz. **Decision: keep the
+> B322.** 2.4 GHz has to work, but only over about 3 m, so its antenna can be
+> very poor. The 2.4 GHz port has its own pins and uses the datasheet's
+> reference match (Table 5.8, with a BGS12WN6 SPDT tying the TX and RX pins
+> together); it doesn't interact with the sub-GHz diplexer.
 
 The first model is the **shared-TX-pin diplexer** (`tx_diplexer.py`). The RX
 side (SP3T selector → wideband LNA → broadband pin match) is not modelled yet.
